@@ -14,8 +14,8 @@ library(stats)
 SimulateAMaze = function(nbcol, nbrow, complexity){
   Maze = matrix(data = 0, nrow = nbrow, ncol = nbcol)
   Maze = as.vector(Maze)
-  AgentStartCell = as.integer(runif(1, 0,nbcol))*as.integer(runif(1, 0,nbrow))
-  GoalCell = as.integer(runif(1, 0,nbcol))*as.integer(runif(1, 0,nbrow))
+  AgentStartCell = 1 #as.integer(runif(1, 0,nbcol))*as.integer(runif(1, 0,nbrow))
+  GoalCell = nbrow*nbcol #as.integer(runif(1, 0,nbcol))*as.integer(runif(1, 0,nbrow))
   ObstacleCells = as.integer(runif(complexity*2, 0,nbrow*nbcol))
   IntermediateRewardCells = as.integer(runif((1/complexity)*8, 0,nbrow*nbcol))
   
@@ -30,60 +30,86 @@ SimulateAMaze = function(nbcol, nbrow, complexity){
   return(Maze)
 }
 nbrow = 12
-nbrow = 12
-complexity = 20
+nbcol = 12
+complexity = 10
 Maze1 <- SimulateAMaze(nbrow, nbrow, complexity)
 View(matrix(Maze1, nrow = nbrow, ncol = nbcol))
 
-ValueFctInit <- rep(1, nbrow*nbcol)
+ValueFctInit <- rep(-1, nbrow*nbcol)
 ValueFctInit[which(Maze1==1)] <- 0
+ValueFctInit[which(Maze1==3)] <- -1000
 gamma_param <- 1
 
 GlobalInformation <- matrix(data = NA, nrow = nbrow*nbcol, ncol = 3)
 GlobalInformation[,c(1,2)] <- as.matrix(expand.grid(1:nbrow, 1:nbcol))
 GlobalInformation[,3] <- ValueFctInit
+GlobalInformation <- cbind(GlobalInformation, Maze1)
+GlobalInformation_old <- GlobalInformation
+GlobalInformation_old[,3] <- 0
+cc <- 0
 ### ValueIterationAlgorithm
-for (s in c(1:nrow(GlobalInformation))){
-  if (s!=3){ # we cannot be in a cell of value 3, this is an obstacle
-    # all the states where we can go from s
-    s_currentstate <- GlobalInformation[i,c(1,2)]
-    upper <- c(s_currentstate[1]-1, s_currentstate[2]-1)
+while (max(abs(GlobalInformation_old[,3]-GlobalInformation[,3]))>0.01){
+  cc <- cc + 1
+  GlobalInformation_old <- GlobalInformation
+  print(cc)
+  for (s in c(1:nrow(GlobalInformation))){
+    if ((GlobalInformation[s, 4]!=3) && GlobalInformation[s, 4]!=1){ # we cannot be in a cell of value 3, this is an obstacle
+      # all the states where we can go from s
+    s_currentstate <- GlobalInformation[s,c(1,2)]
+    upper <- c(s_currentstate[1]-1, s_currentstate[2])
+    right <- c(s_currentstate[1], s_currentstate[2]+1)
+    left <- c(s_currentstate[1], s_currentstate[2]-1)
+    lower <- c(s_currentstate[1]+1, s_currentstate[2])
+    
     next_possible_states = NULL
-    if (any(upper<=0)){
-      upper = NULL
+    
+    if (any(upper<=0) || upper[1] > nbrow || upper[2] > nbcol){
+        upper = NULL
     }else{
-      next_possible_states = rbind(next_possible_states, upper)
+      if (GlobalInformation[GlobalInformation[,1]==upper[1] & GlobalInformation[,2]==upper[2], 4]==3){
+        upper = NULL
+      }else{
+        next_possible_states = rbind(next_possible_states, upper)
+      }
     }
-    right <- c(s_currentstate[1]-1, s_currentstate[2]+1)
-    if (any(right<=0)){
+    if (any(right<=0) || right[1] > nbrow || right[2] > nbcol){
       right = NULL
     }else{
-      next_possible_states = rbind(next_possible_states, right)
+      if (GlobalInformation[GlobalInformation[,1]==right[1] & GlobalInformation[,2]==right[2], 4]==3){
+        right = NULL
+      }else{
+        next_possible_states = rbind(next_possible_states, right)
+      }
     }
-    left <- c(s_currentstate[1]+1, s_currentstate[2]-1)
-    if (any(left<=0)){
+    if (any(left<=0) || left[1] > nbrow || left[2] > nbcol){
       left = NULL
     }else{
-      next_possible_states = rbind(next_possible_states, left)
+      if (GlobalInformation[GlobalInformation[,1]==left[1] & GlobalInformation[,2]==left[2], 4]==3){
+        left = NULL
+      }else{
+        next_possible_states = rbind(next_possible_states, left)
+      }
     }
-    lower <- c(s_currentstate[1]+1, s_currentstate[2]+1)
-    if (any(lower<=0)){
+    if (any(lower<=0) || lower[1] > nbrow || lower[2] > nbcol){
       lower = NULL
     }else{
-      next_possible_states = rbind(next_possible_states, lower)
+      if (GlobalInformation[GlobalInformation[,1]==lower[1] & GlobalInformation[,2]==lower[2], 4]==3){
+        lower = NULL
+      }else{
+        next_possible_states = rbind(next_possible_states, lower)
+      }
     }
-    next_possible_states = next_possible_states[Maze1[next_possible_states]!=3]
     next_possible_states = matrix(next_possible_states, nrow=length(next_possible_states)/2, ncol = 2)    
+    
+    tmp <- NULL
     for (i in c(1:nrow(next_possible_states))){
       s_next = next_possible_states[i,]
-      GlobalInformation[rowSums(GlobalInformation[,c(1,2)]==s_next)>1,3]
-        -1 + gamma_param*Old_ValueFct[s_next]
-      }
-    New_ValueFct[s] <- 
-      
+      tmp[i] <- GlobalInformation[GlobalInformation[,1]==s_next[1] & GlobalInformation[,2]==s_next[2],3]
+    }
+    GlobalInformation[s, 3] <- -1 + max(tmp)
   }
-} 
+  } 
+}
 
-
-
+View(matrix(data = GlobalInformation[, 3], nbrow, nbcol))
 

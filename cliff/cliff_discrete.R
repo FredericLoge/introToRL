@@ -23,7 +23,7 @@
 #
 # Conditions on boundaries of course ....
 
-# FIRST TRY ========================================================
+# MAIN ========================================================
 
 # imports
 library(tidyverse)

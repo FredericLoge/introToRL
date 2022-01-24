@@ -3,13 +3,13 @@
 ## Description 
 
 Quick introduction to Reinforcement Learning
+
 Currently, all code is written in R.
 
 ## Tree
 ```
-cd introToRL
-tree -L 1
-```
+> cd introToRL
+> tree -L 1
 ├── README.md
 ├── algorithms
 ├── cliff
@@ -17,4 +17,5 @@ tree -L 1
 ├── maze
 ├── restaurant
 └── tictactoe
+```
 

@@ -3,6 +3,6 @@
 .RData
 .Ruserdata
 .idea/*
-.DS_Store
-.png
-.jpg
+*.DS_Store
+*.png
+*.jpg

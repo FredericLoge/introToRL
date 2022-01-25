@@ -4,6 +4,7 @@
 library(tidyverse)
 
 # load functions
+source('restaurant/restaurant_foo.R')
 source('restaurant/restaurant_foo_strategy_to_fill.R')
 
 # PROBLEM SETUP ======================================================
@@ -20,11 +21,11 @@ nb_timesteps = 1000
 
 # define strategy
 strategy = list('name'='RANDOM', 'pars'=list(nb_cold_start_rounds=5))
-strategy = list('name'='ETC', 'pars'=list(m=30, nb_cold_start_rounds=5))
-strategy = list('name'='EXP3', 'pars'=list(nb_cold_start_rounds=0, eta=0.5, weights=rep(1,nb_restaurants)))
-strategy = list('name'='EPS_GREEDY', 'pars'=list(nb_cold_start_rounds=5, eps=0.1))
-strategy = list('name'='UCB', 'pars'=list(nb_cold_start_rounds=5, alpha=0.05))
-strategy = list('name'='TS', 'pars'=list(nb_cold_start_rounds=5))
+# strategy = list('name'='ETC', 'pars'=list(m=30, nb_cold_start_rounds=5))
+# strategy = list('name'='EXP3', 'pars'=list(nb_cold_start_rounds=0, eta=0.5, weights=rep(1,nb_restaurants)))
+# strategy = list('name'='EPS_GREEDY', 'pars'=list(nb_cold_start_rounds=5, eps=0.1))
+# strategy = list('name'='UCB', 'pars'=list(nb_cold_start_rounds=5, alpha=0.05))
+# strategy = list('name'='TS', 'pars'=list(nb_cold_start_rounds=5))
 
 # SIMULATION ======================================================
 

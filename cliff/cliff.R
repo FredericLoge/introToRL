@@ -29,13 +29,13 @@
 library(tidyverse)
 library(emojifont) # install.packages("emojifont")
 library(gganimate)
-source('cliffProblemFoo.R')
+source('cliff/cliff_discrete_foo.R')
 
 # generate state space
-states = generate_states(n=5, m=7, goal_reward=20, abyss_reward=-20, default_reward=-1)
+states = generate_states(n=7, m=7, goal_reward=20, abyss_reward=-20, default_reward=-1)
 
 # generate transition matrix
-tmat = generate_transition_matrix(s=states, pr=0.6)
+tmat = generate_transition_matrix(s=states, pr=0.8)
 
 # check transition matrix integrity
 check_integrity_transition_matrix(tmat)
@@ -56,16 +56,24 @@ VI = run_value_iteration(states, tmat, pars_print=list(n_chars=15),
 # present policy
 plot_cliff_policy(VI)
 
-# simulate run under policy
-positions = simulate_run(VI)
+# simulate runs under policy
+list_sim = list()
+for(i in 1:9){
+  list_sim[[i]] = simulate_run(VI) %>% mutate(simu = i)
+}
+positions = bind_rows(list_sim)
 
 # visualize result
 gg = plot_cliff_environment(VI$states)
 an = gg + 
   labs(title = 'Cliff environment simulation') + 
-  geom_text(data=positions, 
+  geom_text(data=positions %>% filter(simu == 1), 
             aes(y=row, x=col), 
             label=emoji(aliases='runner'), 
-            family='EmojiOne', cex=25, vjust=0.25) 
-anim_save('anim.gif', an + transition_states(time_index))
+            family='EmojiOne', cex=25, vjust=0.25)
+animate(an + transition_states(time_index), 
+        nframes = 24, 
+        device = "png",
+        renderer = file_renderer("~/Documents/cliff", prefix = "cliff_plot", overwrite = TRUE))
+## anim_save('anim.gif', an + transition_states(time_index))
 

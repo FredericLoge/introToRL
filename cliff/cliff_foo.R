@@ -111,7 +111,7 @@ plot_cliff_environment <- function(states){
               label=emoji(aliases='skull_and_crossbones'), 
               family='EmojiOne', cex=25, vjust=0.25) +
     scale_y_reverse() +
-    scale_x_continuous(position="top") +
+    scale_x_continuous(position="top", breaks=1:max(states$col)) +
     coord_equal() +
     labs(x='', y='', fill='', title='Cliff environment') +
     theme_minimal() +
@@ -261,7 +261,7 @@ plot_cliff_policy <- function(vi_out){
                  aes(x = x, xend = xend, y = y, yend = yend),
                  arrow = arrow(length = unit(0.5, "cm"))) +
     scale_y_reverse() +
-    scale_x_continuous(position = "top") +
+    scale_x_continuous(position="top", breaks=1:max(states$col)) +
     coord_equal() +
     labs(x = '', y = '', fill = '', title = 'Optimal actions', 
          subtitle = expr(paste("Under parameters: ", gamma, "=", !!vi_out$pars$gamma, ", ", Delta, "=", !!vi_out$pars$delta_threshold, ", max_iter = ", !!vi_out$pars$max_iter))) +

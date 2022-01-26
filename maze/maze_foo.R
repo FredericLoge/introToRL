@@ -14,10 +14,10 @@ simulate_maze = function(nbcol, nbrow, complexity, goal_reward, obstacle_reward,
     )) %>%
     mutate(
       reward = case_when(
-        category == 'goal' ~ +100,
-        category == 'obstacle' ~ -1000,
-        category == 'intermediate_reward' ~ 0,
-        TRUE ~ -5
+        category == 'goal' ~ +goal_reward,
+        category == 'obstacle' ~ obstacle_reward,
+        category == 'intermediate_reward' ~ immediate_reward,
+        TRUE ~ usual_reward
       )
     )
   return(maze)
@@ -73,7 +73,10 @@ our_which_max <- function(named_vec, return_all=FALSE){
 }
 
 
-run_value_function_iteration <- function(maze, pars = list(delta_threshold = 0.01, max_iter = 100, gamma = 0.9)){
+run_value_function_iteration <- function(maze, 
+                                         pars = list(delta_threshold = 0.01, 
+                                                     max_iter = 100, 
+                                                     gamma = 0.9)){
   
   value_function <- maze %>%
     mutate(

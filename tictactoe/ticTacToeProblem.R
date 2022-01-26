@@ -76,6 +76,7 @@ simulateTicTacToeGame <- function(agentPolicy, robotPolicy, whoStarts="agent"){
       gb[a[1], a[2]] = "X"
       if(checkIfPlayerWon(gb, "X")){
         gameHistory$reward[i] = +1
+        winner = 'agent'
       }else{
         gameHistory$reward[i] = 0
       }
@@ -83,44 +84,56 @@ simulateTicTacToeGame <- function(agentPolicy, robotPolicy, whoStarts="agent"){
       a = robotPolicy(gb)
       gb[a[1], a[2]] = "O"
       if(i > 0){ gameHistory$nextState[i] = flattenGameboard(gb) }
-      if(checkIfPlayerWon(gb, "0")){
+      if(checkIfPlayerWon(gb, "O")){
+        winner = 'robot'
         gameHistory$reward[i] = -1
       }
     }
     
     # change turn
     turn = ifelse(turn == "agent", "robot", "agent")    
-    
+
     # check that board isn't full
     boardIsNotFull = (sum(gb == "_")>0)
+    
+  }
+  
+  ls = length(gameHistory$state) 
+  lns = length(gameHistory$nextState) 
+  if(lns == (ls - 1)){
+    gameHistory$nextState[ls] = gameHistory$state[ls]
+  }else if(lns < (ls-1)){
+    stop('Weird dimensions on simulation log. Check run.')
   }
   
   return(gameHistory)
 }
 
 gameSimulations = list()
-for(i in 1:100){
-  o <- simulateTicTacToeGame(randomPolicy, randomPolicy)
-  o <- data.frame(o)
-  o$simulation <- i
+N <- 10000
+pb <- txtProgressBar(min = 0, max = N)
+for(i in 1:N){
+  setTxtProgressBar(pb, value = i)
+  o <- simulateTicTacToeGame(randomPolicy, randomPolicy, whoStarts = "agent")
+  o <- o %>% as_tibble() %>% mutate(simu = i)
   gameSimulations[[i]] <- o
 }
-gameSimulations = do.call(rbind.data.frame, gameSimulations)
+gameSimulations = bind_rows(gameSimulations)
 
 # focus on one of the players performance 
-df <- gameSimulations[gameSimulations$turn == "player1",]
+df <- gameSimulations
 
 # QLearning
 # - setup (state x action) matrix with Q-value of 0
 # - set hyperparameters
 # - Q-Learning algorithms
-stateEnums = sort(unique(as.character(df$state)))
-# stateEnums = sort(unique(c(as.character(df$state), as.character(df$nextState))))
+#stateEnums = sort(unique(as.character(df$state)))
+stateEnums = sort(unique(c(as.character(df$state), as.character(df$nextState))))
 actionEnums = sort(unique(as.character(df$action)))
 qmatrix = matrix(data = -20, nrow = length(stateEnums), ncol = length(actionEnums))
 notConverged = TRUE
 qGamma = 0.8
-qAlpha = 1.0
+qAlpha = 0.8
 while(notConverged){
   oldQmatrix = qmatrix
   for(index in 1:nrow(df)){
@@ -128,16 +141,39 @@ while(notConverged){
     index_sp = (stateEnums == df$nextState[index])
     index_a = (actionEnums == df$action[index])
     oldValue = qmatrix[index_s, index_a]
-    newValue = df$reward1[index] + qGamma * max(qmatrix[index_sp,])
+    newValue = df$reward[index] + qGamma * max(qmatrix[index_sp,])
     qmatrix[index_s, index_a] = oldValue + qAlpha * (newValue - oldValue)
   }
   maxDiffQmatrix = max(qmatrix - oldQmatrix)
   print(maxDiffQmatrix)
   notConverged = (maxDiffQmatrix > 1e-2)
 }
+
 table(apply(qmatrix, 1, function(x) any(x > -20)))
 
-# 
-runQLearning <- function(state, action, reward, nextState){
+our_which_max <- function(n, x, return_all = TRUE){
+  ind = which(x == max(x))
+  if(length(ind) == 1 | return_all){
+    return(n[ind])
+  }else{
+    return('')
+  }
   
 }
+
+recommendations <- apply(qmatrix, 1, function(x) our_which_max(n=actionEnums, x = x))
+
+ind = which(stateEnums == flattenGameboard(emptyGameboard()))
+ind = which((substr(stateEnums, 1, 1) == "X") & 
+        (substr(stateEnums, 4, 4) == "X") &
+  (substr(stateEnums, 7, 7) == "_"))
+unflattenGameboard(stateEnums[ind][1])
+rec = tibble(a = actionEnums, q = qmatrix[ind[1],]) %>%
+  mutate(row = substr(a, 1, 1), 
+         col = substr(a, 3, 3))
+recommendations[ind[1]]
+ggplot(data = rec) +
+  aes(x = col, y = row, fill = q) +
+  geom_tile() + 
+  scale_fill_viridis_c()
+

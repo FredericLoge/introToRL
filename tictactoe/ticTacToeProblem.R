@@ -10,6 +10,7 @@
 # imports
 library(tidyverse)
 source('tictactoe/ticTacToe_foo.R')
+source('tictactoe/ticTacToe_foo_to_fill.R')
 
 # run bunch of simulations
 gameSimulations = list()
@@ -38,10 +39,12 @@ ql <- run_qlearning(df = gameSimulations)
 # X X _
 # ? ? ?
 # ? ? ?
+#
+# %>% 
+#  filter(substr(state, 1, 1) == "X", 
+#         substr(state, 4, 4) == "X") 
+
 
 # run montecarlo
 mc <- run_montecarlo()
 
-running_V_estimate %>% 
-  filter(substr(state, 1, 1) == "X", 
-         substr(state, 4, 4) == "X") 

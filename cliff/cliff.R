@@ -29,13 +29,13 @@
 library(tidyverse)
 library(emojifont) # install.packages("emojifont")
 library(gganimate)
-source('cliff/cliff_discrete_foo.R')
+source('cliff/cliff_foo.R')
 
 # generate state space
 states = generate_states(n=7, m=7, goal_reward=20, abyss_reward=-20, default_reward=-1)
 
 # generate transition matrix
-tmat = generate_transition_matrix(s=states, pr=0.8)
+tmat = generate_transition_matrix(s=states, pr=0)
 
 # check transition matrix integrity
 check_integrity_transition_matrix(tmat)
@@ -50,8 +50,10 @@ tmat %>%
   arrange(state1)
 
 # run value iteration algorithm
-VI = run_value_iteration(states, tmat, pars_print=list(n_chars=15),
-                         pars_VI=list(gamma=0.9, delta_threshold=1e-3, max_iter=200))
+VI = run_value_iteration(states, tmat, 
+                         pars_print=list(n_chars=15),
+                         pars_VI=list(gamma=0.9, 
+                                      delta_threshold=1e-3, max_iter=200))
 
 # present policy
 plot_cliff_policy(VI)

@@ -10,11 +10,11 @@
 # imports
 library(tidyverse)
 source('tictactoe/ticTacToe_foo.R')
-source('tictactoe/ticTacToe_foo_to_fill.R')
+# source('tictactoe/ticTacToe_foo_to_fill.R')
 
 # run bunch of simulations
 gameSimulations = list()
-N <- 10000
+N <- 100
 pb <- txtProgressBar(min = 0, max = N)
 for(i in 1:N){
   setTxtProgressBar(pb, value = i)

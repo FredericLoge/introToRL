@@ -16,7 +16,18 @@ checkIfPlayerWon <- function(gb, mark){
 }
 
 randomPolicy <- function(gb){
+  cu <- "X"
+  if(sum(gb != "_") %% 2 == 1){
+    cu <- "O"
+  }
   freeSpace = which(gb == "_", arr.ind = TRUE)
+  for(i in 1:nrow(freeSpace)){
+    gbn <- gb
+    gbn[freeSpace[i,1], freeSpace[i,2]] <- cu
+    if(checkIfPlayerWon(gbn, mark = cu)){
+      return(freeSpace[i,])
+    }
+  }
   return(freeSpace[sample(1:nrow(freeSpace), 1),])
 }
 
